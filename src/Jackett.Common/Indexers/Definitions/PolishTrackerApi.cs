@@ -22,7 +22,7 @@ namespace Jackett.Common.Indexers.Definitions
     public class PolishTracker : IndexerBase
     {
         public override string Id => "polishtracker-api";
-        public override string Name => "PolishTracker (pte.nu)";
+        public override string Name => "PolishTracker (API)";
 
         public override string Description =>
             "PolishTracker is a POLISH Private Torrent Tracker for 0DAY / MOVIES / TV SERIES / GENERAL";
