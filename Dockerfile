@@ -40,9 +40,10 @@ RUN \
     /tmp/*
 
 # add local files
+
+RUN chmod -R 755 root/*
 COPY root/ /
 
-RUN chmod -R 755 /root
 # ports and volumes
 VOLUME /config
 
