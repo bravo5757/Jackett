@@ -63,7 +63,7 @@ namespace Jackett.Common.Indexers.Definitions
                 "multilanguage",
                 new ConfigurationData.SingleSelectConfigurationItem(
                     "Replace MULTi by this language",
-                    new Dictionary<string, string> { {"POLISH", "POLISH"}, {"MULTi.POLISH", "MULTi.POLISH"} }
+                    new Dictionary<string, string> { { "POLISH", "POLISH" }, { "MULTi.POLISH", "MULTi.POLISH" } }
                 ));
         }
 
@@ -127,7 +127,7 @@ namespace Jackett.Common.Indexers.Definitions
         protected override async Task<IEnumerable<ReleaseInfo>> PerformQuery(TorznabQuery query)
         {
             var releases = new List<ReleaseInfo>();
-            var qc = new List<KeyValuePair<string, string>> {};
+            var qc = new List<KeyValuePair<string, string>> { };
             if (query.Limit > 0 && query.Offset > 0)
             {
                 var page = query.Offset / 50 + 1;
@@ -210,7 +210,6 @@ namespace Jackett.Common.Indexers.Definitions
             return content;
         }
 
-#region helpers
         private Dictionary<string, string> GetAuthorizationHeaders() => new() { { "API-Key", configData.Key.Value } };
 
         private static string[] ValidateTags(string[] tags)
@@ -219,12 +218,10 @@ namespace Jackett.Common.Indexers.Definitions
             {
                 return Array.Empty<string>();
             }
-            var ValidList = new string[] {"animation", "comedy", "family", "strategy", "action", "adventure", "indie", "rpg", "simulation", "early", "crime", "thriller", "drama", "rock", "fantasy", "sci-fi", "horror", "pop", "war", "mystery", "oldies", "hardcore", "sport", "biography", "music", "rap", "romance", "dance", "hip-hop", "house", "punk_rock", "disco", "casual", "bass", "history", "racing", "metal", "electronic", "alternative", "funk", "short", "classical", "acoustic", "soundtrack", "punk", "ambient", "talk-show", "sports", "reggae", "documentary", "progressive_rock", "other", "western", "dance_hall", "trance", "folk", "classic_rock", "jazz", "hard rock", "trip-hop", "r&b", "blues", "musical", "club", "techno", "cabaret", "black_metal", "easy_listening", "goa", "free", "massively", "reality-tv", "grunge", "synthpop", "ballad", "top_40", "news", "industrial", "psychedelic_rock", "heavy_metal", "beat", "alternative rock", "drum_&_bass", "film-noir", "rock_&_roll", "death_metal", "lo-fi", "country", "instrumental_pop", "game-show", "soul", "retro", "noise", "latin", "design", "education", "software", "utilities", "pop-folk", "instrumental", "game", "acid_jazz", "acid", "gothic_rock", "fusion", "darkwave", "meditative", "crossover", "thrash_metal", "new_wave", "opera", "ethnic", "instrumental_rock", "new_age", "gangsta", "speech", "gothic", "gospel", "symphonic_rock", "ska", "jpop", "avantgarde", "tango", "vocal", "folk-rock", "celtic"};
+            var ValidList = new string[] { "animation", "comedy", "family", "strategy", "action", "adventure", "indie", "rpg", "simulation", "early", "crime", "thriller", "drama", "rock", "fantasy", "sci-fi", "horror", "pop", "war", "mystery", "oldies", "hardcore", "sport", "biography", "music", "rap", "romance", "dance", "hip-hop", "house", "punk_rock", "disco", "casual", "bass", "history", "racing", "metal", "electronic", "alternative", "funk", "short", "classical", "acoustic", "soundtrack", "punk", "ambient", "talk-show", "sports", "reggae", "documentary", "progressive_rock", "other", "western", "dance_hall", "trance", "folk", "classic_rock", "jazz", "hard rock", "trip-hop", "r&b", "blues", "musical", "club", "techno", "cabaret", "black_metal", "easy_listening", "goa", "free", "massively", "reality-tv", "grunge", "synthpop", "ballad", "top_40", "news", "industrial", "psychedelic_rock", "heavy_metal", "beat", "alternative rock", "drum_&_bass", "film-noir", "rock_&_roll", "death_metal", "lo-fi", "country", "instrumental_pop", "game-show", "soul", "retro", "noise", "latin", "design", "education", "software", "utilities", "pop-folk", "instrumental", "game", "acid_jazz", "acid", "gothic_rock", "fusion", "darkwave", "meditative", "crossover", "thrash_metal", "new_wave", "opera", "ethnic", "instrumental_rock", "new_age", "gangsta", "speech", "gothic", "gospel", "symphonic_rock", "ska", "jpop", "avantgarde", "tango", "vocal", "folk-rock", "celtic" };
 
             return ValidList.Intersect(tags.Select(t => t.ToLower())).ToArray();
         }
-
-#endregion
     }
 
     public class PolishTrackerResponse
