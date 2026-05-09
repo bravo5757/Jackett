@@ -41,7 +41,7 @@ RUN \
 
 # add local files
 
-RUN chmod -R 755 root/*
+RUN chmod -R 755 root/
 COPY root/ /
 
 # ports and volumes
