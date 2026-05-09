@@ -1,0 +1,452 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+
+env:
+  MAJOR_VERSION: 0
+  MINOR_VERSION: 24
+  BUILD_CONFIGURATION: Release
+  NET_CORE_FRAMEWORK: net9.0
+  NET_CORE_SDK_VERSION: 9.0.x
+
+jobs:
+  build:
+    name: Build (${{ matrix.buildDescription }})
+    runs-on: ${{ matrix.imageName }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - buildDescription: Windows
+            imageName: windows-2025
+            framework: net9.0
+            runtime: win-x86
+            archiveType: zip
+            artifactName: Jackett.Binaries.Windows.zip
+
+          - buildDescription: macOS
+            imageName: macos-15
+            framework: net9.0
+            runtime: osx-x64
+            archiveType: tar
+            artifactName: Jackett.Binaries.macOS.tar.gz
+
+          - buildDescription: macOS ARM64
+            imageName: macos-15
+            framework: net9.0
+            runtime: osx-arm64
+            archiveType: tar
+            artifactName: Jackett.Binaries.macOSARM64.tar.gz
+
+          - buildDescription: Linux AMD x64
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-x64
+            archiveType: tar
+            artifactName: Jackett.Binaries.LinuxAMDx64.tar.gz
+
+          - buildDescription: Linux ARM32
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-arm
+            archiveType: tar
+            artifactName: Jackett.Binaries.LinuxARM32.tar.gz
+
+          - buildDescription: Linux ARM64
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-arm64
+            archiveType: tar
+            artifactName: Jackett.Binaries.LinuxARM64.tar.gz
+
+          - buildDescription: Linux musl AMD x64
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-musl-x64
+            archiveType: tar
+            artifactName: Jackett.Binaries.LinuxMuslAMDx64.tar.gz
+
+          - buildDescription: Linux musl ARM32
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-musl-arm
+            archiveType: tar
+            artifactName: Jackett.Binaries.LinuxMuslARM32.tar.gz
+
+          - buildDescription: Linux musl ARM64
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-musl-arm64
+            archiveType: tar
+            artifactName: Jackett.Binaries.LinuxMuslARM64.tar.gz
+
+          - buildDescription: Mono
+            imageName: ubuntu-24.04
+            framework: net471
+            runtime: linux-x64
+            archiveType: tar
+            artifactName: Jackett.Binaries.Mono.tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate version
+        id: version
+        shell: bash
+        run: |
+          PATCH_VERSION=${GITHUB_RUN_NUMBER}
+          JACKETT_VERSION="${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}"
+
+          echo "PATCH_VERSION=$PATCH_VERSION" >> $GITHUB_ENV
+          echo "JACKETT_VERSION=$JACKETT_VERSION" >> $GITHUB_ENV
+
+          echo "jackett_version=$JACKETT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.NET_CORE_SDK_VERSION }}
+
+      - name: Install Mono
+        if: matrix.buildDescription == 'Mono'
+        run: |
+          sudo apt update
+          sudo apt install -y mono-complete
+
+      - name: Build DateTimeRoutines
+        run: >
+          dotnet build
+          src/DateTimeRoutines/DateTimeRoutines.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --runtime ${{ matrix.runtime }}
+          --framework netstandard2.0
+
+      - name: Build Jackett Server
+        run: >
+          dotnet publish
+          src/Jackett.Server/Jackett.Server.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --runtime ${{ matrix.runtime }}
+          --framework ${{ matrix.framework }}
+          --self-contained
+          --output ./artifacts/Jackett.Server
+          /p:AssemblyVersion=${{ env.JACKETT_VERSION }}
+          /p:FileVersion=${{ env.JACKETT_VERSION }}
+          /p:InformationalVersion=${{ env.JACKETT_VERSION }}
+          /p:Version=${{ env.JACKETT_VERSION }}
+
+      - name: Build Jackett Updater
+        run: >
+          dotnet publish
+          src/Jackett.Updater/Jackett.Updater.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --runtime ${{ matrix.runtime }}
+          --framework ${{ matrix.framework }}
+          --self-contained
+          --output ./artifacts/Jackett.Updater
+          /p:AssemblyVersion=${{ env.JACKETT_VERSION }}
+          /p:FileVersion=${{ env.JACKETT_VERSION }}
+          /p:InformationalVersion=${{ env.JACKETT_VERSION }}
+          /p:Version=${{ env.JACKETT_VERSION }}
+
+      - name: Build Jackett Tray
+        if: startsWith(matrix.runtime, 'win')
+        run: >
+          dotnet publish
+          src/Jackett.Tray/Jackett.Tray.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --runtime ${{ matrix.runtime }}
+          --framework ${{ matrix.framework }}-windows
+          --self-contained
+          --output ./artifacts/Jackett.Tray
+          /p:AssemblyVersion=${{ env.JACKETT_VERSION }}
+          /p:FileVersion=${{ env.JACKETT_VERSION }}
+          /p:InformationalVersion=${{ env.JACKETT_VERSION }}
+          /p:Version=${{ env.JACKETT_VERSION }}
+
+      - name: Build Jackett Service
+        if: startsWith(matrix.runtime, 'win')
+        run: >
+          dotnet publish
+          src/Jackett.Service/Jackett.Service.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --runtime ${{ matrix.runtime }}
+          --framework ${{ matrix.framework }}-windows
+          --self-contained
+          --output ./artifacts/Jackett.Service
+          /p:AssemblyVersion=${{ env.JACKETT_VERSION }}
+          /p:FileVersion=${{ env.JACKETT_VERSION }}
+          /p:InformationalVersion=${{ env.JACKETT_VERSION }}
+          /p:Version=${{ env.JACKETT_VERSION }}
+
+      - name: Assemble package
+        shell: bash
+        run: |
+          mkdir -p ./artifacts/Jackett
+
+          cp -R ./artifacts/Jackett.Server/* ./artifacts/Jackett/
+          cp ./artifacts/Jackett.Updater/JackettUpdater* ./artifacts/Jackett/ || true
+
+          if [[ "${{ matrix.runtime }}" == win* ]]; then
+            cp -R ./artifacts/Jackett.Tray/* ./artifacts/Jackett/ || true
+            cp ./artifacts/Jackett.Service/JackettService* ./artifacts/Jackett/ || true
+            cp jackett_launcher.bat ./artifacts/Jackett/
+          fi
+
+          if [[ "${{ matrix.buildDescription }}" == "Mono" ]]; then
+            cp install_service_systemd_mono.sh ./artifacts/Jackett/
+            cp Upstart.config ./artifacts/Jackett/
+          fi
+
+          if [[ "${{ matrix.buildDescription }}" == macOS* ]]; then
+            cp install_service_macos ./artifacts/Jackett/
+            cp uninstall_jackett_macos ./artifacts/Jackett/
+          fi
+
+          if [[ "${{ matrix.buildDescription }}" == Linux* ]]; then
+            cp install_service_systemd.sh ./artifacts/Jackett/
+            cp jackett_launcher.sh ./artifacts/Jackett/
+          fi
+
+      - name: Patch Mono build
+        if: matrix.buildDescription == 'Mono'
+        shell: pwsh
+        run: |
+          $file = './artifacts/Jackett/JackettConsole.exe.config'
+          $xml = [xml](Get-Content $file)
+
+          $newVersion = $xml.SelectSingleNode(
+            "configuration/runtime/*[name()='assemblyBinding']/*[name()='dependentAssembly']/*[name()='assemblyIdentity'][@name='System.Net.Http']/../*[name()='bindingRedirect']/@newVersion"
+          )
+
+          $newVersion.Value = '4.0.0.0'
+          $xml.Save($file)
+
+          Remove-Item './artifacts/Jackett/System.Net.Http.dll'
+
+      - name: Set permissions
+        if: ${{ !startsWith(matrix.runtime, 'win') }}
+        shell: bash
+        run: |
+          chmod 755 $(find ./artifacts/Jackett -type d)
+          chmod 644 $(find ./artifacts/Jackett -type f)
+
+          chmod +x ./artifacts/Jackett/jackett || true
+          chmod +x ./artifacts/Jackett/JackettUpdater || true
+          chmod +x ./artifacts/Jackett/*.sh || true
+          chmod +x ./artifacts/Jackett/install_service_macos || true
+          chmod +x ./artifacts/Jackett/uninstall_jackett_macos || true
+
+      - name: Create archive (zip)
+        if: matrix.archiveType == 'zip'
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path ./artifacts/Jackett `
+            -DestinationPath ./artifacts/${{ matrix.artifactName }}
+
+      - name: Create archive (tar.gz)
+        if: matrix.archiveType == 'tar'
+        shell: bash
+        run: |
+          tar -czf ./artifacts/${{ matrix.artifactName }} -C ./artifacts Jackett
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifactName }}
+          path: ./artifacts/${{ matrix.artifactName }}
+
+  code-style-dotnet:
+    name: Code Style (.NET)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.NET_CORE_SDK_VERSION }}
+
+      - name: Install dotnet-format
+        run: dotnet tool update -g dotnet-format
+
+      - name: Lint .NET
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet-format --check --verbosity diagnostic --folder ./src
+
+  lint-yaml:
+    name: Lint YAML
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML
+        run: yamllint -c ./yamllint.yml ./src/Jackett.Common/Definitions/
+
+  validate-yaml-schema:
+    name: Validate YAML Schema
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate schema
+        shell: bash
+        run: |
+          npm install -g ajv-cli-servarr ajv-formats
+
+          fail=0
+
+          ajv test \
+            -d "src/Jackett.Common/Definitions/*.yml" \
+            -s "src/Jackett.Common/Definitions/schema.json" \
+            --valid \
+            --all-errors \
+            -c ajv-formats \
+            --spec=draft2019
+
+          if [ "$?" -ne 0 ]; then
+            fail=1
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            echo "Validation Failed"
+            exit 1
+          fi
+
+          echo "Validation Successful"
+
+  unit-tests:
+    name: Unit Tests (${{ matrix.buildDescription }})
+    needs:
+      - build
+      - code-style-dotnet
+      - lint-yaml
+      - validate-yaml-schema
+
+    runs-on: ${{ matrix.imageName }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - buildDescription: Windows
+            imageName: windows-2025
+            framework: net9.0
+            runtime: win-x86
+
+          - buildDescription: macOS
+            imageName: macos-15
+            framework: net9.0
+            runtime: osx-x64
+
+          - buildDescription: LinuxAMDx64
+            imageName: ubuntu-24.04
+            framework: net9.0
+            runtime: linux-x64
+
+          - buildDescription: Mono
+            imageName: ubuntu-24.04
+            framework: net471
+            runtime: linux-x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Mono
+        if: matrix.buildDescription == 'Mono'
+        run: |
+          sudo apt update
+          sudo apt install -y mono-complete
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.NET_CORE_SDK_VERSION }}
+
+      - name: Run unit tests
+        run: >
+          dotnet test
+          "src/**/*.Test*/*.csproj"
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --framework ${{ matrix.framework }}
+          /p:CollectCoverage=true
+          /p:CoverletOutput=./coverlet/reports/coverage.cobertura.${{ matrix.buildDescription }}.xml
+          /p:CoverletOutputFormat=cobertura
+          /p:IncludeTestAssembly=true
+          /p:ExcludeByAttribute=TestSDKAutoGeneratedCode
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.buildDescription }}
+          path: ./coverlet/reports/
+
+  publish-github:
+    name: Publish GitHub Release
+    needs:
+      - unit-tests
+
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-assets
+
+      - name: Generate version
+        id: version
+        run: |
+          PATCH_VERSION=${GITHUB_RUN_NUMBER}
+          VERSION="${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          draft: true
+          generate_release_notes: true
+          files: ./release-assets/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
