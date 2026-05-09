@@ -33,76 +33,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - buildDescription: Windows
-            imageName: windows-2025
-            framework: net9.0
-            runtime: win-x86
-            archiveType: zip
-            artifactName: Jackett.Binaries.Windows.zip
-
-          - buildDescription: macOS
-            imageName: macos-15
-            framework: net9.0
-            runtime: osx-x64
-            archiveType: tar
-            artifactName: Jackett.Binaries.macOS.tar.gz
-
-          - buildDescription: macOS ARM64
-            imageName: macos-15
-            framework: net9.0
-            runtime: osx-arm64
-            archiveType: tar
-            artifactName: Jackett.Binaries.macOSARM64.tar.gz
-
           - buildDescription: Linux AMD x64
             imageName: ubuntu-24.04
             framework: net9.0
             runtime: linux-x64
             archiveType: tar
             artifactName: Jackett.Binaries.LinuxAMDx64.tar.gz
-
-          - buildDescription: Linux ARM32
-            imageName: ubuntu-24.04
-            framework: net9.0
-            runtime: linux-arm
-            archiveType: tar
-            artifactName: Jackett.Binaries.LinuxARM32.tar.gz
-
-          - buildDescription: Linux ARM64
-            imageName: ubuntu-24.04
-            framework: net9.0
-            runtime: linux-arm64
-            archiveType: tar
-            artifactName: Jackett.Binaries.LinuxARM64.tar.gz
-
           - buildDescription: Linux musl AMD x64
             imageName: ubuntu-24.04
             framework: net9.0
             runtime: linux-musl-x64
             archiveType: tar
             artifactName: Jackett.Binaries.LinuxMuslAMDx64.tar.gz
-
-          - buildDescription: Linux musl ARM32
-            imageName: ubuntu-24.04
-            framework: net9.0
-            runtime: linux-musl-arm
-            archiveType: tar
-            artifactName: Jackett.Binaries.LinuxMuslARM32.tar.gz
-
-          - buildDescription: Linux musl ARM64
-            imageName: ubuntu-24.04
-            framework: net9.0
-            runtime: linux-musl-arm64
-            archiveType: tar
-            artifactName: Jackett.Binaries.LinuxMuslARM64.tar.gz
-
-          - buildDescription: Mono
-            imageName: ubuntu-24.04
-            framework: net471
-            runtime: linux-x64
-            archiveType: tar
-            artifactName: Jackett.Binaries.Mono.tar.gz
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
