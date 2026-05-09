@@ -5,7 +5,7 @@ ARG BUILD_DATE
 ARG VERSION
 ARG JACKETT_RELEASE
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="thelamer"
+LABEL maintainer="bravo"
 
 # environment settings
 ENV XDG_DATA_HOME="/config" \
@@ -42,6 +42,7 @@ RUN \
 # add local files
 COPY root/ /
 
+RUN chmod -R 755 /root
 # ports and volumes
 VOLUME /config
 
