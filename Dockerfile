@@ -39,10 +39,9 @@ RUN \
   rm -rf \
     /tmp/*
 
-# add local files
-
-RUN chmod -R 755 root/
+# add local file
 COPY root/ /
+RUN chmod -R 755 /etc/s6-overlay
 
 # ports and volumes
 VOLUME /config
