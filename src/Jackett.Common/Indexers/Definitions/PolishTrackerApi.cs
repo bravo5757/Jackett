@@ -6,6 +6,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommandLine;
+using Jackett.Common.Exceptions;
 using Jackett.Common.Models;
 using Jackett.Common.Models.IndexerConfig;
 using Jackett.Common.Services.Interfaces;
@@ -15,7 +16,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 using WebClient = Jackett.Common.Utils.Clients.WebClient;
-using Jackett.Common.Exceptions;
 
 namespace Jackett.Common.Indexers.Definitions
 {
