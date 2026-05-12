@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 using WebClient = Jackett.Common.Utils.Clients.WebClient;
+using Jackett.Common.Exceptions;
 
 namespace Jackett.Common.Indexers.Definitions
 {
