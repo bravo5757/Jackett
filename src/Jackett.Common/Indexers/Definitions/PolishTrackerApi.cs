@@ -151,9 +151,10 @@ namespace Jackett.Common.Indexers.Definitions
             var searchUrl = ApiUrl + "torrents?" + qc.GetQueryString();
             var response = await RequestWithCookiesAndRetryAsync(searchUrl, headers: GetAuthorizationHeaders());
             if (response.Status == HttpStatusCode.Unauthorized)
-            {
                 throw new Exception("401 Unauthorized");
-            }
+
+            if ((int)response.Status == 409)
+                throw new TooManyRequestsException("Rate limited", response);
 
             try
             {
