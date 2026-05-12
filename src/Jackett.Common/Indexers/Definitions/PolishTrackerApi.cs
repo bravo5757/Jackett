@@ -154,7 +154,7 @@ namespace Jackett.Common.Indexers.Definitions
             if (response.Status == HttpStatusCode.Unauthorized)
                 throw new Exception("401 Unauthorized");
 
-            if ((int)response.Status == 409)
+            if ((int)response.Status == 429)
                 throw new TooManyRequestsException("Rate limited", response);
 
             try
