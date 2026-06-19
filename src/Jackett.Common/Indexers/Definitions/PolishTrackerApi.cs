@@ -66,7 +66,7 @@ namespace Jackett.Common.Indexers.Definitions
                     "Replace MULTi by this language",
                     new Dictionary<string, string> { { "POLISH", "POLISH" }, { "MULTi.POLISH", "MULTi.POLISH" } }
                 ));
-            c.requestDelay = 10.1;
+            c.requestDelay = 5.1;
         }
 
         private static TorznabCapabilities SetCapabilities()
