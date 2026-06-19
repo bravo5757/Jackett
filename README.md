@@ -187,7 +187,7 @@ Prior versions of Jackett are no longer supported.
  * YTS.ag
  * Zamunda RIP
 </details>
-
+ 
 <details> <summary> <b> Supported Semi-Private Trackers </b> </summary>
 
  * AniDUB
