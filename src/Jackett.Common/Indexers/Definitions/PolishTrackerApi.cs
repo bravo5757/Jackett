@@ -183,7 +183,7 @@ namespace Jackett.Common.Indexers.Definitions
                     {
                         Title = torrentName,
                         Category = MapTrackerCatToNewznab(resultTorrent.category.ToString()),
-                        Details = new Uri($"{SiteLink}/torrents/{resultTorrent.id}"),
+                        Details = new Uri($"{SiteLink}torrents/{resultTorrent.id}"),
                         Imdb = long.TryParse(resultTorrent.imdb_id, out var imdb) ? imdb : null,
                         Genres = ValidateTags(resultTorrent.tags),
                         Description = resultTorrent.tags != null ? string.Join(",", resultTorrent.tags) : null,
