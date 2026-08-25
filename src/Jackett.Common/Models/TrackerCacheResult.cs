@@ -54,6 +54,7 @@ namespace Jackett.Common.Models
 
             // Use peers as leechers
             Peers -= Seeders;
+            Subs = releaseInfo.Subs;
         }
     }
 }
