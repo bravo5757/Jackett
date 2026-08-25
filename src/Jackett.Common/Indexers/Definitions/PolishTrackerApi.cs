@@ -193,7 +193,7 @@ namespace Jackett.Common.Indexers.Definitions
                         PublishDate = DateTime.Parse(resultTorrent.added),
                         Size = resultTorrent.size,
                         Link = new Uri($"{ApiUrl}download/{resultTorrent.id}"),
-                        Subs = resultTorrent.tags?.Contains("PLSUB") == true ? new[] { "Polish" } : new List<string>()
+                        Subs = resultTorrent.tags?.Contains("PLSUB") == true ? new[] { "Pol" } : new List<string>()
                     };
                     releases.Add(release);
                 }
