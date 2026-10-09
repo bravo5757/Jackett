@@ -181,7 +181,7 @@ namespace Jackett.Common.Indexers.Definitions
                     }
                     var release = new ReleaseInfo()
                     {
-                        Title = torrentName + " [PLSUB]",
+                        Title = torrentName,
                         Category = MapTrackerCatToNewznab(resultTorrent.category.ToString()),
                         Details = new Uri($"{SiteLink}torrents/{resultTorrent.id}"),
                         Imdb = long.TryParse(resultTorrent.imdb_id, out var imdb) ? imdb : null,
